@@ -26,8 +26,8 @@ const firstDay = new Date(year, month - 1, 2, -1)
 const firstDayNum = firstDay.getDate()
 let firstWday = firstDay.getDay()
 
-const title = month + '月' + year
-console.log(title.padStart(13, (' ')))
+const title = month + '月 ' + year
+console.log(title.padStart(14, (' ')))
 console.log('日 月 火 水 木 金 土')
 process.stdout.write(''.padStart(firstWday * 3, ' '))
 
