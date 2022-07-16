@@ -13,6 +13,9 @@ if (argv.y === undefined) {
 let month
 if (argv.m === undefined) {
   month = thisMonth
+} else if (argv.m < 1 || argv.m > 12) {
+  console.log('有効な値を入力してください')
+  month = thisMonth
 } else {
   month = argv.m
 }
@@ -26,11 +29,11 @@ let firstWday = firstDay.getDay()
 const title = month + '月' + year
 console.log(title.padStart(13, (' ')))
 console.log('日 月 火 水 木 金 土')
-process.stdout.write(''.padStart(firstWday * 3))
+process.stdout.write(''.padStart(firstWday * 3, ' '))
 
 for (let day = firstDayNum; day <= lastDayNum; day++) {
   firstWday++
-  day = (' ' + day).slice(-2)
+  day = String(day).padStart(2, ' ')
   if (firstWday % 7 === 0) {
     console.log(day)
   } else {
