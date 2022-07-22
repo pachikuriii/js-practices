@@ -22,7 +22,7 @@ if (argv.m === undefined) {
 
 const lastDay = new Date(year, month, 0)
 const lastDayNum = lastDay.getDate()
-const firstDay = new Date(year, month - 1, 2, -1)
+const firstDay = new Date(year, month - 1, 1)
 const firstDayNum = firstDay.getDate()
 let firstWday = firstDay.getDay()
 
