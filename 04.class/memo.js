@@ -1,44 +1,66 @@
+process.stdin.resume()
 process.stdin.setEncoding('utf8')
-
 const fs = require('fs')
-const lines = []
-const reader = require('readline').createInterface({
-  input: process.stdin
-})
-
-reader.on('line', (line) => { // 改行ごとに"line"イベントが発火
-  lines.push(line) // lines配列に、標準入力から渡されたデータを入れる
-})
-reader.on('close', () => { // 標準入力のストリームが終了すると呼ばれる
-
-  const lines2 = JSON.stringify(
-    { Title: lines[0], Memo: lines[1] + lines[2] + lines[3] }, null, ' ')
-  fs.writeFileSync('memo.json', lines2)
-
-})
-
+const memosContent = JSON.parse(fs.readFileSync('memo.json', 'utf8'))
 const argv = require('minimist')(process.argv.slice(2))
-const { Select } = require('enquirer');
-if (argv.r === true) {
-  const prompt = new Select({
-    name: 'title',
-    message: 'Choose a note you want to see:',
-    choices: ['apple', 'grape', 'watermelon', 'cherry', 'orange']
-  });
+const { Select } = require('enquirer')
+const reader = require('readline').createInterface({
+  input: process.stdin,
+  output: process.stdout
+})
 
+const memoData = []
+reader.on('line', (line) => {
+  memoData.push(line)
+})
+reader.on('close', () => {
+  const newMemo =
+  {
+    message: memoData[0],
+    value: memoData[0],
+    content: memoData.join('\n')
+  }
+  memosContent.Memos.push(newMemo)
+  const newMemos = JSON.stringify(memosContent)
+  fs.writeFileSync('memo.json', newMemos)
+})
+
+if (argv.l === true) {
+  for (let i = 0; i < memosContent.Memos.length; i++) {
+    console.log(memosContent.Memos[i].message)
+  }
+  process.stdin.pause()
+} else if (argv.r === true) {
+  const prompt = new Select({
+    message: '表示したいメモを選択してください:',
+    choices: memosContent.Memos
+  })
   prompt.run()
-    .then(answer => console.log(answer))
-    .catch(console.error);
-} else if (argv.l === true) {
-  const jsonObject = JSON.parse(fs.readFileSync('./memo.json', 'utf8'));
-  console.log(jsonObject.Title)
+    .then(answer => {
+      const indexNum = prompt.choices.findIndex(({ value }) => value === answer)
+      return indexNum
+    })
+    .then(indexNum => {
+      const fileContent = JSON.parse(fs.readFileSync('memo.json', 'utf8'))
+      console.log(fileContent.Memos[indexNum].content)
+    })
+    .catch(console.error)
 } else if (argv.d === true) {
   const prompt = new Select({
-    name: 'title',
-    message: 'Choose a note you want to delete:',
-    choices: ['apple', 'grape', 'watermelon', 'cherry', 'orange']
-  });
+    message: '削除したいメモを選択してください:',
+    choices: memosContent.Memos
+  })
   prompt.run()
-    .then(answer => console.log(answer))
-    .catch(console.error);
+    .then(answer => {
+      prompt.choices.findIndex(({ value }) => value === answer)
+    })
+    .then(indexNum => {
+      const fileContent = JSON.parse(fs.readFileSync('memo.json', 'utf8'))
+      fileContent.Memos.splice(0, [indexNum] + 1)
+      fs.writeFileSync('memo.json', JSON.stringify(fileContent))
+    })
+    .then(answer =>
+      console.log('メモが削除されました')
+    )
+    .catch(console.error)
 }
