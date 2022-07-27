@@ -3,6 +3,7 @@ process.stdin.setEncoding('utf8')
 const fs = require('fs')
 const memosContent = JSON.parse(fs.readFileSync('memo.json', 'utf8'))
 const argv = require('minimist')(process.argv.slice(2))
+const { v4: uuidv4 } = require('uuid')
 const { Select } = require('enquirer')
 const reader = require('readline').createInterface({
   input: process.stdin,
@@ -17,7 +18,7 @@ reader.on('close', () => {
   const newMemo =
   {
     message: memoData[0],
-    value: memoData[0],
+    value: uuidv4(),
     content: memoData.join('\n')
   }
   memosContent.Memos.push(newMemo)
@@ -34,6 +35,7 @@ if (argv.l === true) {
   const prompt = new Select({
     message: '表示したいメモを選択してください:',
     choices: memosContent.Memos
+
   })
   prompt.run()
     .then(answer => {
@@ -52,11 +54,12 @@ if (argv.l === true) {
   })
   prompt.run()
     .then(answer => {
-      prompt.choices.findIndex(({ value }) => value === answer)
+      const indexNum = prompt.choices.findIndex(({ value }) => value === answer)
+      return indexNum
     })
     .then(indexNum => {
       const fileContent = JSON.parse(fs.readFileSync('memo.json', 'utf8'))
-      fileContent.Memos.splice(0, [indexNum] + 1)
+      fileContent.Memos.splice(indexNum, 1)
       fs.writeFileSync('memo.json', JSON.stringify(fileContent))
     })
     .then(answer =>
