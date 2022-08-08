@@ -52,11 +52,11 @@ class MemoApp {
   }
 
   showPrompt () {
-    this.showPrompt
+    return this.showPrompt
   }
 
   deletePrompt () {
-    this.deletePrompt
+    return this.deletePrompt
   }
 }
 
