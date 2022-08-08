@@ -10,7 +10,7 @@ const reader = require('readline').createInterface({
   output: process.stdout
 })
 
-class MemoPiece {
+class Memo {
   constructor (memoData) {
     this.message = memoData[0]
     this.value = uuidv4()
@@ -18,9 +18,17 @@ class MemoPiece {
   }
 }
 
-class Memo {
+class MemoApp {
   constructor () {
     this.memosContent = memosContent
+    this.showPrompt = new Select({
+      message: '表示したいメモを選択してください',
+      choices: memosContent.Memos
+    })
+    this.deletePrompt = new Select({
+      message: '削除したいメモを選択してください',
+      choices: memosContent.Memos
+    })
   }
 
   create (newMemo) {
@@ -42,45 +50,46 @@ class Memo {
     this.memosContent.Memos.splice(indexNum, 1)
     fs.writeFileSync('memo.json', JSON.stringify(this.memosContent))
   }
+
+  showPrompt () {
+    this.showPrompt
+  }
+
+  deletePrompt () {
+    this.deletePrompt
+  }
 }
 
 const memoData = []
+const memoApp = new MemoApp(memosContent)
 reader.on('line', (line) => {
   memoData.push(line)
 })
 reader.on('close', () => {
-  new Memo().create(new MemoPiece(memoData))
+  memoApp.create(new Memo(memoData))
 })
 
-if (argv.l === true) {
-  new Memo(memosContent).show()
+if (argv.l) {
+  memoApp.show()
   process.exit()
-} else if (argv.r === true) {
-  const prompt = new Select({
-    message: '表示したいメモを選択してください:',
-    choices: memosContent.Memos
-  })
-  prompt.run()
+} else if (argv.r) {
+  memoApp.showPrompt.run()
     .then(answer => {
-      const indexNum = prompt.choices.findIndex(({ value }) => value === answer)
+      const indexNum = memoApp.showPrompt.choices.findIndex(({ value }) => value === answer)
       return indexNum
     })
     .then(indexNum => {
-      new Memo().detail(indexNum)
+      memoApp.detail(indexNum)
     })
     .catch(console.error)
-} else if (argv.d === true) {
-  const prompt = new Select({
-    message: '削除したいメモを選択してください:',
-    choices: memosContent.Memos
-  })
-  prompt.run()
+} else if (argv.d) {
+  memoApp.deletePrompt.run()
     .then(answer => {
-      const indexNum = prompt.choices.findIndex(({ value }) => value === answer)
+      const indexNum = memoApp.deletePrompt.choices.findIndex(({ value }) => value === answer)
       return indexNum
     })
     .then(indexNum => {
-      new Memo().delete(indexNum)
+      memoApp.delete(indexNum)
     })
     .then(answer =>
       console.log('メモが削除されました')
