@@ -21,14 +21,6 @@ class Memo {
 class MemoApp {
   constructor () {
     this.memosContent = memosContent
-    this.showPrompt = new Select({
-      message: '表示したいメモを選択してください',
-      choices: memosContent.Memos
-    })
-    this.deletePrompt = new Select({
-      message: '削除したいメモを選択してください',
-      choices: memosContent.Memos
-    })
   }
 
   create (newMemo) {
@@ -51,12 +43,16 @@ class MemoApp {
     fs.writeFileSync('memo.json', JSON.stringify(this.memosContent))
   }
 
-  showPrompt () {
-    return this.showPrompt
+  prompt (displayMessage) {
+    return this.#select(displayMessage)
   }
 
-  deletePrompt () {
-    return this.deletePrompt
+  #select (displayMessage) {
+    const select = new Select({
+      message: displayMessage,
+      choices: this.memosContent.Memos
+    })
+    return select
   }
 }
 
@@ -73,9 +69,9 @@ if (argv.l) {
   memoApp.show()
   process.exit()
 } else if (argv.r) {
-  memoApp.showPrompt.run()
+  memoApp.prompt('表示したいメモを選択してください').run()
     .then(answer => {
-      const indexNum = memoApp.showPrompt.choices.findIndex(({ value }) => value === answer)
+      const indexNum = memoApp.prompt('表示したいメモを選択してください').choices.findIndex(({ value }) => value === answer)
       return indexNum
     })
     .then(indexNum => {
@@ -83,9 +79,9 @@ if (argv.l) {
     })
     .catch(console.error)
 } else if (argv.d) {
-  memoApp.deletePrompt.run()
+  memoApp.prompt('削除したいメモを選択してください').run()
     .then(answer => {
-      const indexNum = memoApp.deletePrompt.choices.findIndex(({ value }) => value === answer)
+      const indexNum = memoApp.prompt('削除したいメモを選択してください').choices.findIndex(({ value }) => value === answer)
       return indexNum
     })
     .then(indexNum => {
