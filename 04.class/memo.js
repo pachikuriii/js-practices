@@ -34,25 +34,45 @@ class MemoApp {
     }
   }
 
-  detail (indexNum) {
-    console.log(this.memosContent.Memos[indexNum].content)
+  detail (displayMessage) {
+    this.#selectMemo(displayMessage).run()
+      .then(answer =>
+        this.#findIndexNum(displayMessage, answer))
+      .then(indexNum => {
+        console.log(this.memosContent.Memos[indexNum].content)
+      })
+      .catch(console.error)
   }
 
-  delete (indexNum) {
-    this.memosContent.Memos.splice(indexNum, 1)
-    fs.writeFileSync('memo.json', JSON.stringify(this.memosContent))
+  delete (displayMessage) {
+    this.#selectMemo(displayMessage).run()
+      .then(answer =>
+        this.#findIndexNum(displayMessage, answer))
+      .then(indexNum => {
+        this.memosContent.Memos.splice(indexNum, 1)
+        fs.writeFileSync('memo.json', JSON.stringify(this.memosContent))
+      })
+      .then(answer =>
+        console.log('メモが削除されました')
+      )
+      .catch(console.error)
   }
 
   prompt (displayMessage) {
-    return this.#select(displayMessage)
+    return this.#selectMemo(displayMessage)
   }
 
-  #select (displayMessage) {
-    const select = new Select({
+  #selectMemo (displayMessage) {
+    const memo = new Select({
       message: displayMessage,
       choices: this.memosContent.Memos
     })
-    return select
+    return memo
+  }
+
+  #findIndexNum (displayMessage, answer) {
+    const indexNum = memoApp.prompt(displayMessage).choices.findIndex(({ value }) => value === answer)
+    return indexNum
   }
 }
 
@@ -69,26 +89,7 @@ if (argv.l) {
   memoApp.show()
   process.exit()
 } else if (argv.r) {
-  memoApp.prompt('表示したいメモを選択してください').run()
-    .then(answer => {
-      const indexNum = memoApp.prompt('表示したいメモを選択してください').choices.findIndex(({ value }) => value === answer)
-      return indexNum
-    })
-    .then(indexNum => {
-      memoApp.detail(indexNum)
-    })
-    .catch(console.error)
+  memoApp.detail('表示したいメモを選択してください')
 } else if (argv.d) {
-  memoApp.prompt('削除したいメモを選択してください').run()
-    .then(answer => {
-      const indexNum = memoApp.prompt('削除したいメモを選択してください').choices.findIndex(({ value }) => value === answer)
-      return indexNum
-    })
-    .then(indexNum => {
-      memoApp.delete(indexNum)
-    })
-    .then(answer =>
-      console.log('メモが削除されました')
-    )
-    .catch(console.error)
+  memoApp.delete('削除したいメモを選択してください')
 }
